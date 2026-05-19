@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'header.html' %}
+    <div class="carrito-contenedor">
+        <h1 class="carrito-titulo">Tu Carrito de Compras</h1>
+        {% if items %}
+        <ul class="carrito-lista">
+            {% for item in items %}
+            <li class="carrito-item">
+                <div class="carrito-info">
+                    <h3>{{ item.nombre }}</h3>
+                    <p>${{ item.precio }} x {{ item.cantidad or 1 }} = ${{ item.precio * (item.cantidad or 1) }}</p>
+                </div>
+                <form action="/carrito/update/{{ item.id }}" method="get" style="display:inline-block;">
+                    <input type="number" name="cantidad" value="{{ item.cantidad or 1 }}" min="1" style="width:50px;" onchange="this.form.submit();">
+                </form>
+                <a href="/carrito/remove/{{ item.id }}" class="carrito-eliminar">×</a>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="carrito-total">
+            Total: ${{ "{:,.0f}".format(total) if total is not none else '0' }} COP
+        </div>
+        <form action="/carrito/checkout" method="POST" style="display: inline;">
+            <button type="submit" class="boton-pagar">COMPRAR POR WHATSAPP</button>
+        </form>
+        <a href="/carrito/clear" class="carrito-eliminar" style="display:inline-block; margin-top:10px;">Vaciar carrito</a>
+        {% else %}
+        <p>El carrito está vacío. <a href="/lineaproductos">Seguir comprando</a></p>
+        {% endif %}
+    </div>
+    <script>
+        function showNotification(msg) {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            const box = document.createElement('div');
+            box.className = 'modal-caja info';
+            box.innerHTML = `<p>${msg}</p>`;
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+            setTimeout(() => overlay.remove(), 3000);
+        }
+    </script>
+</body>
+</html>

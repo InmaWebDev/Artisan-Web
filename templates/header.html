@@ -1,0 +1,37 @@
+<header class="cabecera">
+    <div class="zona-logo"><a href="/index" class="logo-texto">ARTISAN</a></div>
+    <nav class="zona-menu">
+        <ul>
+            <li><a href="/index">Inicio</a></li>
+            <li><a href="/lineaproductos">Catálogo</a></li>
+            {% if session.get('rol') == 'admin' %}<li><a href="/admin">Panel Admin</a></li>{% endif %}
+            <li class="zona-carrito"><a href="/carrito">Carrito</a></li>
+            {% if session.get('user_id') %}
+            <li><a href="/logout">Salir</a></li>
+            {% else %}
+            <li><a href="/login">Login</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>
+
+{# flash notifications inserted in header so it appears on every page #}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="flash-container">
+      {% for category, msg in messages %}
+        <div class="modal-overlay" id="flash-{{ loop.index }}">
+            <div class="modal-caja {{ category }}">
+                <p>{{ msg }}</p>
+            </div>
+        </div>
+      {% endfor %}
+    </div>
+    <script>
+      // auto remove after 3 seconds
+      setTimeout(()=>{
+          document.querySelectorAll('#flash-container .modal-overlay').forEach(el=>el.remove());
+      }, 3000);
+    </script>
+  {% endif %}
+{% endwith %}

@@ -1,0 +1,58 @@
+proyecto_mvc/
+│
+├── src/
+│   └── app/
+│       ├── __init__.py
+│       │
+│       ├── models/           # Capa de Datos
+│       │   ├── __init__.py
+│       │   ├── user.py
+│       │   ├── product.py
+│       │   └── database.py
+│       │
+│       ├── views/            # Capa de Presentación
+│       │   ├── __init__.py
+│       │   ├── templates/
+│       │   │   ├── base.html
+│       │   │   ├── users/
+│       │   │   └── products/
+│       │   └── forms/         # Opcional
+│       │       ├── user_form.py
+│       │       └── product_form.py
+│       │
+│       ├── controllers/      # Capa de Lógica
+│       │   ├── __init__.py
+│       │   ├── user_controller.py
+│       │   └── product_controller.py
+│       │
+│       ├── static/           # Archivos estáticos (opcional)
+│       │   ├── css/
+│       │   ├── js/
+│       │   └── images/
+│       │
+│       │── data/
+│       │   ├── product/
+│       │           id1_Product.txt (opcional)
+│       │           id2_Product.txt (opcional)
+│       │   └── user/
+|       |
+│       └── utils/            # Utilidades
+│           ├── __init__.py
+│           └── helpers.py
+│
+├── tests/                    # Pruebas
+│   ├── test_models/
+│   ├── test_views/
+│   └── test_controllers/
+│
+├── config/                   # Configuraciones
+│   ├── __init__.py
+│   ├── development.py
+│   └── production.py
+│
+├── docs/
+├── requirements.txt
+├── README.md
+└── run.py                   # Punto de entrada
+
+

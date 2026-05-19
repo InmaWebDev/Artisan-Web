@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artisan - Inicio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <main class="contenedor centro">
+        <h1 class="titulo-seccion">NUESTRAS CATEGORÍAS</h1>
+        <p class="subtitulo">Selecciona una sección para ver los productos</p>
+        
+        <div class="grilla-productos mt-40">
+            {% for cat in categorias %}
+            <a href="/lineaproductos?categoria={{ cat.nombre }}" class="producto categoria-card">
+                <h3 class="categoria-nombre">{{ cat.nombre }}</h3>
+            </a>
+            {% endfor %}
+        </div>
+    </main>
+
+<!-- clase mt-40 reutilizada para margenes superiores -->
+</body>
+</html>

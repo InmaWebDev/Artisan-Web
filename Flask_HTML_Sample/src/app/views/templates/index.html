@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+    <h1>Hola, {{nombre}}</h1>
+    <p>Bienvenido a mi primera página con Flask.</p>
+    
+    <h2>Gestión de Usuarios</h2>
+    <ul>
+        <li><a href="{{ url_for('user.formulario') }}">Registrar nuevo usuario</a></li>
+        <li><a href="{{ url_for('user.index') }}">Ver lista de usuarios</a></li>
+    </ul>
+{% endblock %}

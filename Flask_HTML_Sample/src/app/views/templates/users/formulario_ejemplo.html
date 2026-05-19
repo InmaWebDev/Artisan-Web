@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Usuario</title>
+</head>
+<body>
+    <h1>Registro de Usuario</h1>
+    
+    <form action="{{ url_for('user.procesar') }}" method="post">
+        <label>Nombre:</label>
+        <input type="text" name="nombre" required>
+        <br><br>
+
+        <label>Email:</label>
+        <input type="email" name="email" required>
+        <br><br>
+
+        <label>Edad:</label>
+        <input type="number" name="edad">
+        <br><br>
+
+        <button type="submit">Enviar</button>
+    </form>
+    
+    <br>
+    <a href="{{ url_for('user.index') }}">Ver lista de usuarios</a>
+</body>
+</html>

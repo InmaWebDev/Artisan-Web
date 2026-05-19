@@ -1,0 +1,2 @@
+# Development configuration
+DEBUG = True

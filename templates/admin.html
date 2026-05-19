@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Artisan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <main class="contenedor mt-40">
+        <div class="admin-caja">
+            <h2 class="titulo-seccion" style="margin-bottom:15px;">📦 Pedidos Recibidos</h2>
+            {% if pedidos %}
+            <div class="table-responsive">
+            <table>
+                <thead><tr><th>Orden</th><th>Cliente</th><th>Total</th><th>Items</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for p in pedidos %}
+                    <tr>
+                        <td><strong>{{ p.numero_orden }}</strong></td>
+                        <td>{{ p.usuario_nombre }}</td>
+                        <td>${{ "{:,.0f}".format(p.total) }}</td>
+                        <td>{{ p.item_count }} artículos</td>
+                        <td>
+                            <span class="estado-{{ p.estado }}">{{ p.estado|upper }}</span>
+                        </td>
+                        <td style="font-size:0.85em;">{{ p.fecha_creacion[:10] }}</td>
+                        <td>
+                            <button type="button" data-id="{{ p.id }}" data-items='{{ p.items|tojson }}' class="small-btn" onclick="verPedido(this)">Ver</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            {% else %}
+            <p>No hay pedidos aún.</p>
+            {% endif %}
+        </div>
+
+        <div class="admin-caja">
+            <h2 class="titulo-seccion" style="margin-bottom:15px;">Gestionar Categorías</h2>
+            <form action="/admin/cat/add" method="POST" class="flex-form">
+                <input type="text" name="nueva_categoria" placeholder="Nombre de categoría" required>
+                <button type="submit" class="boton-ver">Crear</button>
+            </form>
+            <div class="tag-list">
+                {% for c in categorias %}
+                <span class="tag">
+                    {{ c.nombre }} <a href="/admin/cat/del/{{ c.id }}" class="tag-close">×</a>
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="admin-caja">
+            <h2 class="titulo-seccion" style="margin-bottom:15px;">Subir Producto</h2>
+            <form action="/admin/add_prod" method="POST" enctype="multipart/form-data" class="form-grid">
+                <input type="text" name="nombre" placeholder="Nombre" required>
+                <select name="categoria">
+                    {% for c in categorias %}<option value="{{ c.nombre }}">{{ c.nombre }}</option>{% endfor %}
+                </select>
+                <label>Subproducto de (opcional):</label>
+                <select name="parent_id">
+                    <option value="">(ninguno)</option>
+                    {% for p in productos %}
+                    <option value="{{ p.id }}" {% if parent_prefill == p.id|string %}selected{% endif %}>{{ p.nombre }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="precio" placeholder="Precio (COP)" required>
+                <textarea name="descripcion" placeholder="Características" class="span-2"></textarea>
+                <div class="span-2 small-text">
+                    Fotos: <input type="file" name="img1" required> <input type="file" name="img2"> <input type="file" name="img3">
+                </div>
+                <button type="submit" class="boton-pagar span-2">Publicar</button>
+            </form>
+        </div>
+
+        <div class="admin-caja">
+            <h2 class="titulo-seccion">Productos Actuales</h2>
+            <div class="table-responsive">
+            <table>
+                <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Padre</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for p in productos %}
+                    <tr>
+                        <td>{{ p.nombre }}</td>
+                        <td>{{ p.categoria }}</td>
+                        <td>${{ "{:,.0f}".format(p.precio) }}</td>
+                        <td>{{ p.parent_name or '' }}</td>
+                        <td>
+                    <a href="/admin/prod/edit/{{ p.id }}" class="carrito-editar small-btn">Editar</a>
+                    <a href="/admin/add_prod?parent_id={{ p.id }}" class="small-btn">Subprod</a>
+                    <a href="/admin/prod/del/{{ p.id }}" class="carrito-eliminar small-btn">Borrar</a>
+                </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </main>
+
+    <style>
+        .estado-pendiente { color: #ff9800; font-weight: bold; }
+        .estado-confirmado { color: #4caf50; font-weight: bold; }
+        .estado-cancelado { color: #f44336; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f5f5f5; }
+        .small-btn { padding: 5px 10px; margin: 2px; border-radius: 3px; text-decoration: none; font-size: 0.85em; }
+    </style>
+
+    <script>
+        function verPedido(btn) {
+            // btn: elemento <button> que contiene data-id y data-items
+            const pedidoId = btn.getAttribute('data-id');
+            let items = [];
+            let itemsHtml = '';
+            try {
+                const itemsStr = btn.getAttribute('data-items') || '[]';
+                items = JSON.parse(itemsStr);
+                items.forEach(it => {
+                    const subtotal = (it.precio * (it.cantidad || 1)).toLocaleString('es-CO');
+                    itemsHtml += `<li>${it.nombre} x${it.cantidad || 1} = $${subtotal}</li>`;
+                });
+            } catch (e) {
+                console.error('Error al procesar items:', e);
+                itemsHtml = '<li>Error al cargar los items</li>';
+            }
+
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.onclick = function() { this.remove(); };
+            modal.innerHTML = `
+                <div class="modal-caja" onclick="event.stopPropagation()">
+                    <h3>Detalles del Pedido #${pedidoId}</h3>
+                    <ul>${itemsHtml}</ul>
+                    <button onclick="this.closest('.modal-overlay').remove()" class="small-btn">Cerrar</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+    </script>
+</body>
+</html>

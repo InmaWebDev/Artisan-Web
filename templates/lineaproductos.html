@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artisan - Tienda</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <main class="contenedor">
+        <section class="filtro-productos">
+            {% if not categoria_actual %}
+            <label>Categoria:</label>
+            <select id="categoria-select">
+                <option value="">Todas las secciones</option>
+                {% for c in categorias %}
+                <option value="{{ c.nombre }}" {% if categoria_actual == c.nombre %}selected{% endif %}>{{ c.nombre }}</option>
+                {% endfor %}
+            </select>
+            {% else %}
+            <h2 class="current-category">{{ categoria_actual }}</h2>
+            {% endif %}
+
+            <label>Producto:</label>
+            <select id="nombre-select" data-cat="{{ categoria_actual or '' }}">
+                <option value="">Todos los productos</option>
+                {% for n in nombres %}
+                <option value="{{ n.nombre }}" {% if nombre_actual == n.nombre %}selected{% endif %}>{{ n.nombre }}</option>
+                {% endfor %}
+            </select>
+        </section>
+
+        <div class="grilla-productos mt-40">
+            {% for p in productos %}
+            <div class="producto">
+                <img src="{{ p.imagen_url }}?v={{ ts }}" alt="{{ p.nombre }}">
+                <h3>{{ p.nombre }}</h3>
+                <p>${{ "{:,.0f}".format(p.precio) }} COP</p>
+                <a href="/producto/{{ p.id }}" class="boton-ver">VER MÁS</a>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <script>
+        function applyFilters() {
+            const nom = document.getElementById('nombre-select').value;
+            const selectCat = document.getElementById('categoria-select');
+            const baseCat = document.getElementById('nombre-select').dataset.cat;
+            const params = [];
+            let catVal = '';
+            if (selectCat) {
+                catVal = selectCat.value;
+            } else if (baseCat) {
+                catVal = baseCat;
+            }
+            if (catVal) params.push('categoria=' + encodeURIComponent(catVal));
+            if (nom) params.push('nombre=' + encodeURIComponent(nom));
+            let url = '/lineaproductos';
+            if (params.length) url += '?' + params.join('&');
+            window.location = url;
+        }
+        document.getElementById('nombre-select').addEventListener('change', applyFilters);
+        const catElem = document.getElementById('categoria-select');
+        if (catElem) catElem.addEventListener('change', applyFilters);
+    </script>
+</body>
+</html>

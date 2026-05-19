@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artisan - Registro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="registro-page">
+    <!-- no header here; registration should be a clean form -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div id="flash-container">
+          {% for category, msg in messages %}
+            <div class="modal-overlay" id="flash-{{ loop.index }}">
+                <div class="modal-caja {{ category }}">
+                    <p>{{ msg }}</p>
+                </div>
+            </div>
+          {% endfor %}
+        </div>
+        <script>
+          setTimeout(()=>{document.querySelectorAll('#flash-container .modal-overlay').forEach(el=>el.remove());},3000);
+        </script>
+      {% endif %}
+    {% endwith %}
+    <div class="registro-box">
+        <h1>ÚNETE A ARTISAN</h1>
+        <p>Crea tu cuenta para empezar a comprar</p>
+
+
+        <form action="/registro" method="POST" class="registro-form">
+            <input type="text" name="nombre" placeholder="Nombre completo" minlength="3" required>
+            <input type="email" name="correo" placeholder="Correo electrónico" required>
+            <input type="password" name="password" placeholder="Contraseña (mín. 6 caracteres)" minlength="6" required>
+            <input type="password" name="password_confirm" placeholder="Confirmar contraseña" minlength="6" required>
+            <button type="submit" class="boton-ver boton-registro">REGISTRARSE</button>
+        </form>
+        <p class="registro-link">¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></p>
+    </div>
+</body>
+</html>

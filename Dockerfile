@@ -23,8 +23,5 @@ RUN mkdir -p static/img/productos logs
 # Exponer puerto
 EXPOSE 5000
 
-# Inicializar BD
-RUN python database_setup.py
-
-# Ejecutar con Gunicorn
-CMD ["gunicorn", "--workers", "4", "--bind", "0.0.0.0:5000", "--timeout", "120", "app:app"]
+# Ejecutar inicialización de DB y Gunicorn en tiempo de ejecución
+CMD ["sh", "-lc", "python database_setup.py && gunicorn --workers 4 --bind 0.0.0.0:5000 --timeout 120 app:app"]

@@ -8,7 +8,7 @@
 </head>
 <body>
     {% include 'header.html' %}
-    <div class="carrito-contenedor">
+    <div class="carrito-contenedor reveal">
         <h1 class="carrito-titulo">Tu Carrito de Compras</h1>
         {% if items %}
         <ul class="carrito-lista">
@@ -16,37 +16,39 @@
             <li class="carrito-item">
                 <div class="carrito-info">
                     <h3>{{ item.nombre }}</h3>
-                    <p>${{ item.precio }} x {{ item.cantidad or 1 }} = ${{ item.precio * (item.cantidad or 1) }}</p>
+                    <p>${{ "{:,.0f}".format(item.precio) }} x {{ item.cantidad or 1 }} = ${{ "{:,.0f}".format(item.precio * (item.cantidad or 1)) }}</p>
                 </div>
-                <form action="/carrito/update/{{ item.id }}" method="get" style="display:inline-block;">
-                    <input type="number" name="cantidad" value="{{ item.cantidad or 1 }}" min="1" style="width:50px;" onchange="this.form.submit();">
+                <form action="/carrito/update/{{ item.id }}" method="POST" style="display:inline-flex;align-items:center;gap:8px;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="number" name="cantidad" value="{{ item.cantidad or 1 }}" min="1" class="cantidad-input" style="width:60px;" onchange="this.form.submit();">
                 </form>
-                <a href="/carrito/remove/{{ item.id }}" class="carrito-eliminar">×</a>
+                <form action="/carrito/remove/{{ item.id }}" method="POST" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="carrito-eliminar">&times;</button>
+                </form>
             </li>
             {% endfor %}
         </ul>
         <div class="carrito-total">
             Total: ${{ "{:,.0f}".format(total) if total is not none else '0' }} COP
         </div>
-        <form action="/carrito/checkout" method="POST" style="display: inline;">
-            <button type="submit" class="boton-pagar">COMPRAR POR WHATSAPP</button>
-        </form>
-        <a href="/carrito/clear" class="carrito-eliminar" style="display:inline-block; margin-top:10px;">Vaciar carrito</a>
+        <div class="carrito-actions">
+            <form action="{{ url_for('cart.checkout_whatsapp') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-primary btn-lg">COMPRAR POR WHATSAPP</button>
+            </form>
+            <form action="/carrito/clear" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-ghost btn-sm">Vaciar carrito</button>
+            </form>
+        </div>
         {% else %}
-        <p>El carrito está vacío. <a href="/lineaproductos">Seguir comprando</a></p>
+        <div class="carrito-empty">
+            <p>El carrito está vacío.</p>
+            <a href="/lineaproductos" class="btn btn-primary" style="margin-top:16px;display:inline-flex;">Seguir comprando</a>
+        </div>
         {% endif %}
     </div>
-    <script>
-        function showNotification(msg) {
-            const overlay = document.createElement('div');
-            overlay.className = 'modal-overlay';
-            const box = document.createElement('div');
-            box.className = 'modal-caja info';
-            box.innerHTML = `<p>${msg}</p>`;
-            overlay.appendChild(box);
-            document.body.appendChild(overlay);
-            setTimeout(() => overlay.remove(), 3000);
-        }
-    </script>
+    {% include 'footer.html' %}
 </body>
 </html>

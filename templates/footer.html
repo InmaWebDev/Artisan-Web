@@ -1,0 +1,46 @@
+<footer class="site-footer reveal">
+    <div class="footer-container">
+        <div class="footer-brand">
+            <a href="/index" class="footer-logo">ARTISAN</a>
+            <p>Tienda online premium con piezas y productos cuidadosamente seleccionados para una experiencia elegante y moderna.</p>
+        </div>
+
+        <div class="footer-section">
+            <h3>Atención al cliente</h3>
+            <ul class="footer-links">
+                <li><a href="https://wa.me/{{ WHATSAPP_PHONE }}" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+                <li><a href="https://wa.me/{{ WHATSAPP_PHONE }}" rel="noopener noreferrer">+{{ WHATSAPP_PHONE }}</a></li>
+                <li><span>Calle 5 #14-52</span></li>
+                <li><span>San Agustín - Huila</span></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3>Explorar</h3>
+            <ul class="footer-links">
+                <li><a href="/index">Inicio</a></li>
+                <li><a href="/lineaproductos">Catálogo</a></li>
+                <li><a href="/carrito">Carrito</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2026 ARTISAN. Todos los derechos reservados.</p>
+    </div>
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var reveals = document.querySelectorAll('.reveal');
+    var observer = new IntersectionObserver(function(entries, obs) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.16 });
+    reveals.forEach(function(el) { observer.observe(el); });
+  });
+</script>

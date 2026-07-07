@@ -18,7 +18,7 @@ services:
     env_file:
       - .env.docker
     volumes:
-      - ./static/img/productos:/app/static/img/productos:ro
+      - ./static/img/productos:/app/static/img/productos
       - ./logs:/app/logs
     depends_on:
       - db

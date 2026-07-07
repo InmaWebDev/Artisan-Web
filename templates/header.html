@@ -1,6 +1,19 @@
 <header class="cabecera">
-    <div class="zona-logo"><a href="/index" class="logo-texto">ARTISAN</a></div>
-    <nav class="zona-menu">
+    <div class="header-top">
+        <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="main-menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
+        <div class="header-brand">
+            <a href="/index" class="logo-texto" aria-label="ARTISAN inicio">
+                <span>ARTISAN</span>
+            </a>
+        </div>
+    </div>
+    <nav class="zona-menu" id="main-menu">
         <ul>
             <li><a href="/index">Inicio</a></li>
             <li><a href="/lineaproductos">Catálogo</a></li>
@@ -15,23 +28,23 @@
     </nav>
 </header>
 
-{# flash notifications inserted in header so it appears on every page #}
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div id="flash-container">
-      {% for category, msg in messages %}
-        <div class="modal-overlay" id="flash-{{ loop.index }}">
-            <div class="modal-caja {{ category }}">
-                <p>{{ msg }}</p>
-            </div>
-        </div>
-      {% endfor %}
-    </div>
-    <script>
-      // auto remove after 3 seconds
-      setTimeout(()=>{
-          document.querySelectorAll('#flash-container .modal-overlay').forEach(el=>el.remove());
-      }, 3000);
-    </script>
-  {% endif %}
-{% endwith %}
+{% include '_flash.html' %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var button = document.querySelector('.menu-toggle');
+    var menu = document.getElementById('main-menu');
+    if (button && menu) {
+      button.addEventListener('click', function(event) {
+        event.stopPropagation();
+        var expanded = menu.classList.toggle('active');
+        button.setAttribute('aria-expanded', expanded);
+      });
+      document.addEventListener('click', function(event) {
+        if (!menu.contains(event.target) && !button.contains(event.target)) {
+          menu.classList.remove('active');
+          button.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+  });
+</script>

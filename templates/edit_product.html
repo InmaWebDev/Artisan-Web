@@ -2,23 +2,25 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar producto - {{ p.nombre }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     {% include 'header.html' %}
 
-    <main class="contenedor mt-40">
+    <main class="contenedor mt-40 reveal">
         <div class="admin-caja">
-            <h2 class="titulo-seccion" style="margin-bottom:15px;">Editar Producto</h2>
-            <form action="/admin/prod/edit/{{ p.id }}" method="POST" enctype="multipart/form-data" class="form-grid">
+            <h2>Editar Producto</h2>
+            <form action="{{ url_for('admin.edit_product', id=p.id) }}" method="POST" enctype="multipart/form-data" class="form-grid">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="text" name="nombre" placeholder="Nombre" required value="{{ p.nombre }}">
                 <select name="categoria">
                     {% for c in categorias %}
                     <option value="{{ c.nombre }}" {% if p.categoria==c.nombre %}selected{% endif %}>{{ c.nombre }}</option>
                     {% endfor %}
                 </select>
-                <label>Subproducto de (opcional):</label>
+                <label class="small-text">Subproducto de (opcional):</label>
                 <select name="parent_id">
                     <option value="">(ninguno)</option>
                     {% for prod in productos %}
@@ -37,5 +39,6 @@
             </form>
         </div>
     </main>
+    {% include 'footer.html' %}
 </body>
 </html>

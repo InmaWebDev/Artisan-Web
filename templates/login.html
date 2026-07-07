@@ -6,34 +6,22 @@
     <title>Artisan - Ingreso</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body style="background: #143120; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div id="flash-container">
-          {% for category, msg in messages %}
-            <div class="modal-overlay" id="flash-{{ loop.index }}">
-                <div class="modal-caja {{ category }}">
-                    <p>{{ msg }}</p>
-                </div>
-            </div>
-          {% endfor %}
-        </div>
-        <script>
-          setTimeout(()=>{document.querySelectorAll('#flash-container .modal-overlay').forEach(el=>el.remove());},3000);
-        </script>
-      {% endif %}
-    {% endwith %}
-    <div style="background: white; padding: 40px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center;">
-        <h1 style="color: #143120; font-family: 'Playfair Display', serif;">ARTISAN</h1>
-        <p style="color: #666; margin-bottom: 25px;">Inicia sesión para entrar</p>
+<body class="login-page">
+    {% include '_flash.html' %}
+    <div class="auth-container">
+      <div class="login-box reveal">
+        <h1>ARTISAN</h1>
+        <p>Inicia sesión para entrar</p>
 
-
-        <form action="/login" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
-            <input type="email" name="correo" placeholder="Correo" required style="padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-            <input type="password" name="password" placeholder="Contraseña" required style="padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-            <button type="submit" class="boton-ver" style="background: #143120; color: white; border: none; padding: 12px; cursor: pointer;">ENTRAR</button>
+        <form action="/login" method="POST" class="registro-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="email" name="correo" placeholder="Correo" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <button type="submit" class="boton-ver btn-block">ENTRAR</button>
         </form>
-        <p style="margin-top: 20px;">¿No tienes cuenta? <a href="/registro" style="color: #2f6852; font-weight: bold; text-decoration: none;">Crea una aquí</a></p>
+        <p class="registro-link">¿No tienes cuenta? <a href="/registro">Crea una aquí</a></p>
+      </div>
     </div>
+    {% include 'footer.html' %}
 </body>
 </html>

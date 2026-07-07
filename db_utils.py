@@ -23,8 +23,14 @@ class DatabaseConnection:
     def execute(self, query, params=None):
         if self.postgres:
             query = query.replace('?', '%s')
+            if 'INSERT OR IGNORE' in query:
+                query = query.replace('INSERT OR IGNORE', 'INSERT')
+            if 'DELETE' in query and 'WHERE' in query:
+                pass
         if params is None:
             params = []
+        elif not isinstance(params, (list, tuple)):
+            params = [params]
         cur = self.conn.cursor()
         cur.execute(query, params)
         return cur
@@ -45,28 +51,30 @@ def connect_db():
         return DatabaseConnection(conn, is_postgres=True)
 
     sqlite_path = os.environ.get('SQLITE_PATH', 'database.db')
+    sqlite_dir = os.path.dirname(sqlite_path)
+    if sqlite_dir:
+        os.makedirs(sqlite_dir, exist_ok=True)
     conn = sqlite3.connect(sqlite_path)
     conn.row_factory = sqlite3.Row
+    conn.execute('PRAGMA foreign_keys = ON')
+    conn.execute('PRAGMA busy_timeout = 3000')
     return DatabaseConnection(conn)
-
-
 def table_columns(connection, table_name):
     if using_postgres():
-        cursor = connection.conn.cursor()
-        cursor.execute(
+        cursor = connection.execute(
             "SELECT column_name FROM information_schema.columns WHERE table_name = %s",
             (table_name,)
         )
         return [row['column_name'] for row in cursor.fetchall()]
 
-    cursor = connection.conn.execute(f"PRAGMA table_info({table_name})")
+    cursor = connection.execute(f"PRAGMA table_info({table_name})")
     return [row[1] for row in cursor.fetchall()]
 
 
+
 def ensure_schema(connection):
-    cursor = connection.conn.cursor()
     if using_postgres():
-        cursor.execute('''
+        connection.execute('''
             CREATE TABLE IF NOT EXISTS usuarios (
                 id SERIAL PRIMARY KEY,
                 nombre TEXT,
@@ -75,13 +83,13 @@ def ensure_schema(connection):
                 rol TEXT
             )
         ''')
-        cursor.execute('''
+        connection.execute('''
             CREATE TABLE IF NOT EXISTS categorias (
                 id SERIAL PRIMARY KEY,
                 nombre TEXT UNIQUE
             )
         ''')
-        cursor.execute('''
+        connection.execute('''
             CREATE TABLE IF NOT EXISTS productos (
                 id SERIAL PRIMARY KEY,
                 nombre TEXT,
@@ -94,7 +102,7 @@ def ensure_schema(connection):
                 parent_id INTEGER
             )
         ''')
-        cursor.execute('''
+        connection.execute('''
             CREATE TABLE IF NOT EXISTS pedidos (
                 id SERIAL PRIMARY KEY,
                 numero_orden TEXT UNIQUE,
@@ -109,7 +117,7 @@ def ensure_schema(connection):
             )
         ''')
     else:
-        cursor.execute('''
+        connection.execute('''
             CREATE TABLE IF NOT EXISTS usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nombre TEXT,
@@ -118,13 +126,13 @@ def ensure_schema(connection):
                 rol TEXT
             )
         ''')
-        cursor.execute('''
+        connection.execute('''
             CREATE TABLE IF NOT EXISTS categorias (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nombre TEXT UNIQUE
             )
         ''')
-        cursor.execute('''
+        connection.execute('''
             CREATE TABLE IF NOT EXISTS productos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nombre TEXT,
@@ -137,7 +145,7 @@ def ensure_schema(connection):
                 parent_id INTEGER
             )
         ''')
-        cursor.execute('''
+        connection.execute('''
             CREATE TABLE IF NOT EXISTS pedidos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 numero_orden TEXT UNIQUE,
@@ -152,13 +160,26 @@ def ensure_schema(connection):
             )
         ''')
 
-    # Add missing product columns if needed
-    existing = table_columns(connection, 'productos')
-    if 'img2' not in existing:
-        cursor.execute('ALTER TABLE productos ADD COLUMN img2 TEXT')
-    if 'img3' not in existing:
-        cursor.execute('ALTER TABLE productos ADD COLUMN img3 TEXT')
-    if 'parent_id' not in existing:
-        cursor.execute('ALTER TABLE productos ADD COLUMN parent_id INTEGER')
+    existing_products = table_columns(connection, 'productos')
+    if 'img2' not in existing_products:
+        connection.execute('ALTER TABLE productos ADD COLUMN img2 TEXT')
+    if 'img3' not in existing_products:
+        connection.execute('ALTER TABLE productos ADD COLUMN img3 TEXT')
+    if 'parent_id' not in existing_products:
+        connection.execute('ALTER TABLE productos ADD COLUMN parent_id INTEGER')
 
-    connection.conn.commit()
+    existing_orders = table_columns(connection, 'pedidos')
+    if 'usuario_nombre' not in existing_orders:
+        connection.execute('ALTER TABLE pedidos ADD COLUMN usuario_nombre TEXT')
+    if 'usuario_celular' not in existing_orders:
+        connection.execute('ALTER TABLE pedidos ADD COLUMN usuario_celular TEXT')
+    if 'items' not in existing_orders:
+        connection.execute('ALTER TABLE pedidos ADD COLUMN items TEXT')
+    if 'total' not in existing_orders:
+        connection.execute('ALTER TABLE pedidos ADD COLUMN total REAL')
+    if 'estado' not in existing_orders:
+        connection.execute('ALTER TABLE pedidos ADD COLUMN estado TEXT DEFAULT "pendiente"')
+    if 'fecha_creacion' not in existing_orders:
+        connection.execute('ALTER TABLE pedidos ADD COLUMN fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP')
+
+    connection.commit()

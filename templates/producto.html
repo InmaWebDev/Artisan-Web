@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ p.nombre }}</title>
+    <title>{{ p.nombre }} - Artisan</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     {% include 'header.html' %}
 
-    <main class="contenedor producto-detalle">
+    <main class="contenedor producto-detalle reveal">
         <div class="galeria">
-            <img src="{{ p.imagen_url }}?v={{ ts }}" class="principal-img">
+            <img src="{{ p.imagen_url }}?v={{ cache_buster() }}" alt="{{ p.nombre }}" class="principal-img" loading="lazy">
             {% set extras = [] %}
             {% if p.img2 %}{% set extras = extras + [p.img2] %}{% endif %}
             {% if p.img3 %}{% set extras = extras + [p.img3] %}{% endif %}
             {% if extras %}
             <div class="extra-images">
                 {% for img in extras %}
-                <img src="{{ img }}?v={{ ts }}" class="thumb-img" onerror="this.style.display='none'">
+                <img src="{{ img }}?v={{ cache_buster() }}" alt="{{ p.nombre }}" class="thumb-img" loading="lazy" onerror="this.style.display='none'">
                 {% endfor %}
             </div>
             {% endif %}
@@ -33,25 +33,26 @@
                 <p>{{ p.descripcion|nl2br }}</p>
             </details>
 
-            <form action="/carrito/add/{{ p.id }}" method="get" class="cantidad-form">
-                <label for="cantidad">Aumentar productos</label>
+            <form action="/carrito/add/{{ p.id }}" method="POST" class="cantidad-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label for="cantidad">Cantidad</label>
                 <input id="cantidad" type="number" name="cantidad" value="1" min="1" class="cantidad-input">
-                <button type="submit" class="boton-pagar boton-comprar">AGREGAR AL CARRITO</button>
+                <button type="submit" class="boton-pagar">AGREGAR AL CARRITO</button>
             </form>
-            <button id="whatsapp-buy" class="boton-pagar" style="margin-bottom:15px;">COMPRAR POR WHATSAPP</button>
-            <a href="/lineaproductos" class="volver-tienda">Regresar a la tienda</a>
+            <button id="whatsapp-buy" class="btn btn-secondary btn-block">COMPRAR POR WHATSAPP</button>
+            <a href="/lineaproductos" class="volver-tienda">&larr; Regresar a la tienda</a>
         </div>
 
             <script>
                 function refreshWSLink() {
-                    const qty = document.querySelector('input[name="cantidad"]').value;
-                    const prod = "{{ p.nombre }}";
-                    const price = "{{ '{:,.0f}'.format(p.precio) }}";
-                    const link = window.location.origin + "/producto/{{ p.id }}";
-                    const msg = `Quiero comprar ${qty} de ${prod} a ${price} COP cada uno. ${link}`;
-                    const whatsappPhone = '{{ whatsapp_phone }}';
-                    const url = 'https://api.whatsapp.com/send?phone=' + whatsappPhone + '&text=' + encodeURIComponent(msg);
-                    document.getElementById('whatsapp-buy').onclick = () => { window.location = url; };
+                    var qty = document.querySelector('input[name="cantidad"]').value;
+                    var prod = "{{ p.nombre }}";
+                    var price = "{{ '{:,.0f}'.format(p.precio) }}";
+                    var link = window.location.origin + "/producto/{{ p.id }}";
+                    var msg = "Quiero comprar " + qty + " de " + prod + " a " + price + " COP cada uno. " + link;
+                    var whatsappPhone = '{{ WHATSAPP_PHONE }}';
+                    var url = 'https://api.whatsapp.com/send?phone=' + whatsappPhone + '&text=' + encodeURIComponent(msg);
+                    document.getElementById('whatsapp-buy').onclick = function() { window.location = url; };
                 }
                 document.querySelector('input[name="cantidad"]').addEventListener('input', refreshWSLink);
                 refreshWSLink();
@@ -63,12 +64,13 @@
                 <div class="grilla-productos">
                     {% for s in subproductos %}
                     <a href="/producto/{{ s.id }}" class="producto">
-                        <img src="{{ s.imagen_url }}" alt="{{ s.nombre }}">
+                        <img src="{{ s.imagen_url }}" alt="{{ s.nombre }}" loading="lazy">
                     </a>
                     {% endfor %}
                 </div>
             </section>
             {% endif %}
     </main>
+    {% include 'footer.html' %}
 </body>
 </html>

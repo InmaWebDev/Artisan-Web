@@ -1,0 +1,16 @@
+name: Keep Render Alive
+
+on:
+  schedule:
+    - cron: '*/14 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render URL
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            "https://artisan-web-52a0.onrender.com" \
+            --max-time 30 || echo "pong"
